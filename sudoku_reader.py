@@ -147,7 +147,6 @@ if __name__ == '__main__':
     #read file
     input = hf.read_text_file(file_path=input_file_parent+input_file_name)
     
-    #return the represention
-    for game in input[:num_of_games]:
-        # break
-        print(puzzle_and_rules_to_dimac(game)[:length_of_print_per_game])
+    [knowledge_base] = create_input('4x4.txt', cnf_form=True, num_of_games=1)
+
+    # print(knowledge_base)
