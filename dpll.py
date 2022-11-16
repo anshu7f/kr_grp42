@@ -32,14 +32,15 @@ class dpll_algorithm:
         return knowledge_base
 
 
-    def choose_litteral(knowledge_base):
-        random_clause = random.choice(knowledge_base)
-        random_literal = random.choice(random_clause)
-        return random_literal
+    def choose_litteral(self, knowledge_base):
+        # random_clause = random.choice(knowledge_base)
+        # random_literal = random.choice(random_clause)
+        return knowledge_base[0][0]
 
 
     def dpll(self, knowledge_base):
         litteral = self.has_unit_clause(knowledge_base)
+        
         while litteral:
             knowledge_base = self.unit_propagation(knowledge_base, litteral)
             litteral = self.has_unit_clause(knowledge_base)
@@ -62,10 +63,10 @@ class dpll_algorithm:
 if __name__ == '__main__':
     cnf = dpll_algorithm()
     # knowledge_base = cnf.get_knowledge_base()
-    [knowledge_base] = sr.create_input('4x4.txt', cnf_form=True, num_of_games=1)
-      
+    [knowledge_base] = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=1)
+
     if cnf.dpll(knowledge_base):
         print("satisfiable")
-        print(cnf.solution)
+
     else:
         print("unsatisfiable")

@@ -19,7 +19,7 @@ def make_board(solution):
             #negated values do not need to be visualised
             if x < 0:
                 continue
-
+            print(x)
             # x = str(x)
             # find row index (first row = 1)
             r = str(int(x/100) - 1)
