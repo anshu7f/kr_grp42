@@ -104,7 +104,19 @@ def puzzle_and_rules_to_dimac(sudoku_puzzle):
 {rules_dict["rule_clauses"]}'
 
 
+def create_input(filename:str, num_of_games:int=1, print:bool=False):
 
+    #debug/print variables
+    length_of_print_per_game = 200
+
+    input_file_parent = 'Datasets/'
+    input_file_name = filename
+
+    #read file
+    input = hf.read_text_file(file_path=input_file_parent+input_file_name)
+    
+    #return the represention
+    return [puzzle_and_rules_to_dimac(game) for game in input[:num_of_games]]
 
 if __name__ == '__main__':
 
