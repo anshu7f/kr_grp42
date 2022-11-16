@@ -1,4 +1,5 @@
 import random
+import sudoku_reader as sr
 
 class dpll_algorithm:
     def __init__(self):
@@ -17,10 +18,11 @@ class dpll_algorithm:
                 knowledge_base.append([int(x) for x in line.split()[:-1]])
         return knowledge_base
 
+
     def has_unit_clause(self, knowledge_base):
         for clause in knowledge_base:
             if len(clause) == 1:
-                # self.solution
+                self.solution.append(clause[0])
                 return clause[0]
         return False
 
@@ -59,9 +61,11 @@ class dpll_algorithm:
 
 if __name__ == '__main__':
     cnf = dpll_algorithm()
-    knowledge_base = cnf.get_knowledge_base()
-  
+    # knowledge_base = cnf.get_knowledge_base()
+    [knowledge_base] = sr.create_input('4x4.txt', cnf_form=True, num_of_games=1)
+      
     if cnf.dpll(knowledge_base):
         print("satisfiable")
+        print(cnf.solution)
     else:
         print("unsatisfiable")
