@@ -103,7 +103,7 @@ def puzzle_and_rules_to_dimac(sudoku_puzzle):
 {puzzle_clauses}\n\
 {rules_dict["rule_clauses"]}'
 
-def transform_to_cnf(dimac)->list[list]:
+def transform_to_cnf(dimac):
     lines = dimac.split('\n')
 
     knowledge_base=[]
