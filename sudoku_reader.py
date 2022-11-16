@@ -103,8 +103,20 @@ def puzzle_and_rules_to_dimac(sudoku_puzzle):
 {puzzle_clauses}\n\
 {rules_dict["rule_clauses"]}'
 
+def transform_to_cnf(dimac)->list[list]:
+    lines = dimac.split('\n')
 
-def create_input(filename:str, num_of_games:int=1, print:bool=False):
+    knowledge_base=[]
+
+    for line in lines:
+        line = line.strip()
+        if len(line) > 0 \
+            and not line.startswith('p') and not line.startswith('c'):
+            knowledge_base.append([int(x) for x in line.split()[:-1]])
+    return knowledge_base
+
+
+def create_input(filename:str, cnf_form:bool=False, num_of_games:int=1, print:bool=False):
 
     #debug/print variables
     length_of_print_per_game = 200
@@ -116,7 +128,10 @@ def create_input(filename:str, num_of_games:int=1, print:bool=False):
     input = hf.read_text_file(file_path=input_file_parent+input_file_name)
     
     #return the represention
-    return [puzzle_and_rules_to_dimac(game) for game in input[:num_of_games]]
+    if cnf_form:
+        return [transform_to_cnf(puzzle_and_rules_to_dimac(game)) for game in input[:num_of_games]]
+    else:
+        return [puzzle_and_rules_to_dimac(game) for game in input[:num_of_games]]
 
 if __name__ == '__main__':
 
