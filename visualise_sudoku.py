@@ -5,8 +5,10 @@ import math
 
 def make_board(solution):
     #find dimensions
-    dimensions = round(len(solution) ** (1/3))
-
+    if len(solution) < 3000:
+        dimensions = round(len(solution) ** (1/3))
+    elif len(solution) < 6000:
+        dimensions = 9
     #initiate an empty board (zeros)
     board = {}
     for r in range(dimensions):
@@ -19,7 +21,6 @@ def make_board(solution):
             #negated values do not need to be visualised
             if x < 0:
                 continue
-            print(x)
             # x = str(x)
             # find row index (first row = 1)
             r = str(int(x/100) - 1)
@@ -55,7 +56,7 @@ def print_board(board:dict):
             if dim == 4: 
                 row = row + '| ' if n == 2 else row
             elif dim == 9:
-                row = row + '| ' if n % 3 == 2 else row
+                row = row + '| ' if (n % 3 == 0 and n !=0) else row
 
             #add value to the row
             row = row + str(board[f'{i}{n}']) + ' '
@@ -64,7 +65,7 @@ def print_board(board:dict):
         if dim == 4:
             pr_str = pr_str + ('-'*9) + '\n' if i == 2 else pr_str
         elif dim ==9:
-            pr_str = pr_str + ('-'*27) + '\n' if i%3==2 else pr_str
+            pr_str = pr_str + ('-'*21) + '\n' if (i % 3 == 0 and i !=0) else pr_str
 
         #add row to the board
         pr_str = pr_str + row + '\n'
@@ -80,8 +81,10 @@ def visualizer(solution):
 if __name__ == '__main__':
     cnf = dpll.dpll_algorithm()
     # knowledge_base = cnf.get_knowledge_base()
-    [knowledge_base] = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=1)
-      
+    # [knowledge_base] = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=1)
+    [knowledge_base] = sr.create_input('4x4.txt', cnf_form=True, num_of_games=1)
+
+
     if cnf.dpll(knowledge_base):
         print("satisfiable")
         visualizer(cnf.solution)
