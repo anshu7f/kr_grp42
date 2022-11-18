@@ -37,15 +37,34 @@ class dpll_algorithm:
         # random_literal = random.choice(random_clause)
         return knowledge_base[0][0]
 
+    def check_pure_litteral(self, knowledge_base):
+        dict_kb = {}
+
+        for clause in knowledge_base:
+            for litteral in clause:
+                if litteral not in dict_kb:
+                    dict_kb[litteral] = 1
+                else:
+                    dict_kb[litteral] += 1
+        # return(dict_kb)
+        pure_litterals = []
+        for litteral in dict_kb.keys():
+            if -1*litteral not in dict_kb.keys():
+                pure_litterals.append(litteral)
+
+        if len(pure_litterals)>0:
+            return pure_litterals
+        else:
+            return False
+
 
     def dpll(self, knowledge_base):
- 
         litteral = self.has_unit_clause(knowledge_base)
         
         while litteral:
             knowledge_base = self.unit_propagation(knowledge_base, litteral)
             litteral = self.has_unit_clause(knowledge_base)
-
+        print(self.check_pure_litteral(knowledge_base))
         #Check if there are no clauses left
         if knowledge_base == []:
             return True
@@ -65,9 +84,11 @@ if __name__ == '__main__':
     cnf = dpll_algorithm()
     # knowledge_base = cnf.get_knowledge_base()
     [knowledge_base] = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=1)
+    # test = cnf.check_pure_litteral(knowledge_base)
+    # print(test)
+    cnf.dpll(knowledge_base)
+    # if cnf.dpll(knowledge_base):
+    #     print("satisfiable")
 
-    if cnf.dpll(knowledge_base):
-        print("satisfiable")
-
-    else:
-        print("unsatisfiable")
+    # else:
+    #     print("unsatisfiable")
