@@ -4,10 +4,14 @@ import math
 
 
 def make_board(solution):
+    print(f'len(solutions): {len(solution)}')
     #find dimensions
-    if len(solution) < 3000:
+    if len([x for x in solution if x > 0]) < 500:
         dimensions = round(len(solution) ** (1/3))
-    elif len(solution) < 6000:
+    elif len([x for x in solution if x > 0]) < 800:
+        dimensions = 9
+    else:
+        print('number of positive literals in solution:', len([x for x in solution if x > 0]))
         dimensions = 9
     #initiate an empty board (zeros)
     board = {}
@@ -35,7 +39,8 @@ def make_board(solution):
 
             #check if there already is a value
             if board[r + c] > 0:
-                assert (f'Dubble value on {r}{c}')
+                # print(f'Dubble value on {r}{c}')
+                pass
             else:
                 board[r + c] = v
     return board
