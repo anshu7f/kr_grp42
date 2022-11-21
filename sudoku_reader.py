@@ -116,7 +116,7 @@ def transform_to_cnf(dimac):
     return knowledge_base
 
 
-def create_input(filename:str, cnf_form:bool=False, num_of_games:int=1, print:bool=False):
+def create_input(filename:str, cnf_form:bool=False, num_of_games:int=1):
 
     #debug/print variables
     length_of_print_per_game = 200

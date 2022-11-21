@@ -52,7 +52,7 @@ def print_board(board:dict):
     for i in range(dim):
         row = ''
         for n in range(dim):
-            #create lines for clearity
+            #create vertical lines for clearity
             if dim == 4: 
                 row = row + '| ' if n == 2 else row
             elif dim == 9:
@@ -61,7 +61,7 @@ def print_board(board:dict):
             #add value to the row
             row = row + str(board[f'{i}{n}']) + ' '
 
-        #create lines for clearity
+        #create horizontal lines for clearity
         if dim == 4:
             pr_str = pr_str + ('-'*9) + '\n' if i == 2 else pr_str
         elif dim ==9:
@@ -80,9 +80,8 @@ def visualizer(solution):
 
 if __name__ == '__main__':
     cnf = dpll.dpll_algorithm()
-    # knowledge_base = cnf.get_knowledge_base()
-    # [knowledge_base] = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=1)
-    [knowledge_base] = sr.create_input('4x4.txt', cnf_form=True, num_of_games=1)
+    [knowledge_base] = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=1)
+    # [knowledge_base] = sr.create_input('4x4.txt', cnf_form=True, num_of_games=1)
 
 
     if cnf.dpll(knowledge_base):
