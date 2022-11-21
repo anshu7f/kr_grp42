@@ -10,6 +10,14 @@ class dpll_algorithm:
         self.layer = 0
         # self.unit_propagations_this_layer = 0
 
+    def add_start_to_solution(self, knowledge_base):
+        litteral = self.has_unit_clause(knowledge_base)
+        while litteral:
+            self.solution.append(litteral)
+            knowledge_base = self.unit_propagation(knowledge_base, litteral)
+            litteral = self.has_unit_clause(knowledge_base)
+        return True
+
         
     def get_knowledge_base(self):
         with open('sudoku1.cnf', 'r') as dimacs_file:
@@ -73,9 +81,8 @@ class dpll_algorithm:
             return True
         else:
             self.layer =+ 1
-            # for _ in range(unit_propagations_this_layer):
-            #     self.solution.pop()
-            # self.unit_propagations_this_layer = 0
+            index = self.solution.index(litteral)
+            self.solution = self.solution[:index]
             return self.dpll(knowledge_base + [[-1*litteral]])
         
 
@@ -86,6 +93,7 @@ if __name__ == '__main__':
 
     for kb in knowledge_base:
         cnf = dpll_algorithm()  
+        
         if cnf.dpll(kb):
             print("satisfiable")
             # print(f'\tunits: {cnf.count_units}\n\tchoices: {cnf.count_lit_choose}\n\tlayer: {cnf.layer}')
