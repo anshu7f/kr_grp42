@@ -21,7 +21,25 @@ class Human_intuition(dpll_algorithm):
         self.count_lit_choose = 0
         self.step = 0
 
-        self.test = 0
+        self.ninexnine_block_ranges={
+                '00': (0,3,0,3),
+                '01': (0,3,3,6),
+                '02': (0,3,6,9),
+
+                '10': (3,6,0,3),
+                '11': (3,6,3,6),
+                '12': (3,6,6,9),
+
+                '20': (6,9,0,3),
+                '21': (6,9,3,6),
+                '22': (6,9,6,9)
+                }   
+        self.fourxfour_block_ranges={
+                '00': (0,2,0,2),
+                '01': (0,2,2,4),
+                '10': (2,4,0,2),
+                '11': (2,4,2,4)
+                }
 
 
     def unit_propagation(self, knowledge_base, litteral):
@@ -38,22 +56,31 @@ class Human_intuition(dpll_algorithm):
         literal = self.find_literal_from_position(r=row, c=col)
 
         #plus 1 for translation from index to row number
-        print('suggest:', literal)
+        v_print('suggest: '+ str(literal))
 
         return literal
 
     
     def find_block(self, r, c) -> str:
         if self.dimensions == 4:
+            #blocks can be {0-2}{0-2}
             block = f'{int(r / 2)}{int(c / 2)}'
         elif self.dimensions == 9:
+            #blocks can be {0-3}{0-3}
             block = f'{int(r / 3)}{int(c / 3)}'
         return block
 
     def block_update(self, r, c):
+        #find block identifier
         block = self.find_block(r, c)    
-        #to do: implement adding information points to correct positions regarding 
-        return self.info_matrix
+
+        #find its ranges
+        (rx, ry, cx, cy) = self.block_ranges(block)
+
+        #add 1 information point to all corresponding positions
+        self.info_matrix[rx:ry, cx:cy] += 1
+
+        return
 
 
     def info_update(self, r_i, c_i):
@@ -62,11 +89,11 @@ class Human_intuition(dpll_algorithm):
         #add information points to all elements in corresponding colomn
         self.info_matrix[:, c_i] = self.info_matrix[:, c_i] + 1
         #add information points to all elements inside corresponding block
-        self.info_matrix = self.block_update(r_i, c_i)
+        self.block_update(r_i, c_i)
 
         #note that this position is locked (and therefore non interesting for determining next literal)
         self.info_matrix[r_i,c_i] = -10000
-        return self.info_matrix
+        return 
 
     def find_most_info_pos(self):
         highest = self.info_matrix.argmax()
@@ -99,37 +126,59 @@ class Human_intuition(dpll_algorithm):
         return
 
     def update_boards(self, literal):
+
         if self.reset_board:
+            #done after backpropagation (unkown where it backpropagated, so start over)
             self.info_matrix = np.zeros([self.dimensions, self.dimensions], dtype=np.int16)
             self.board_rep = np.zeros([self.dimensions, self.dimensions], dtype=np.int16)
 
+            #update for every literal in solution
             [self.update_with_literal(x) for x in self.solution]
             self.reset_board = False
-        
+    
+        #last step: update new literal
         self.update_with_literal(literal=literal)
-
         return
+        
+
+    def block_ranges(self, block):
+        if self.dimensions == 4:
+            #find position ranges of this block of 4x4 sodoku
+            (rx, ry, cx, cy) = self.fourxfour_block_ranges.get(block,"Invalid input")
+
+        elif self.dimensions == 9:
+            #find position ranges of this block of 9x9 sodoku
+            (rx, ry, cx, cy) = self.ninexnine_block_ranges.get(block,"Invalid input")
+        return (rx, ry, cx, cy)
 
     def elements_in_block(self, block)->list: #list with all values from block
+        
+        #find ranges of corresponding block
+        (rx, ry, cx, cy) = self.block_ranges(block)
+        
+        #return its values (as flat array)
+        result = self.board_rep[rx:ry, cx:cy].flatten()
+        return result
 
-        if block:
-            return [] 
 
     def find_literal_from_position(self, r, c):
         #range of options:
         options = [x for x in range(1, self.dimensions+1)]
-        #find values in same row
+        #find values in same row and except them from options
         after_row_options = [x for x in options if x not in self.board_rep[r]]
-        #find values in same column
+
+        #find values in same column and except them from options
         after_column_options = [x for x in after_row_options if x not in self.board_rep[:,c]]
         
         #find values in same block
-        block = self.find_block(r, c) 
-        final_options = [x for x in after_column_options if x not in self.elements_in_block(block=block)]
+        values_in_block = self.elements_in_block(block=self.find_block(r, c))
+        # except the block values from options
+        final_options = [x for x in after_column_options if x not in values_in_block]
 
         #if no options are available, return False
         if len(final_options)==0:
             return False
+
         # suggest a value and create literal
         val = final_options[0] #random.choice(final_options)
         literal = int(f'{r+1}{c+1}{val}')
@@ -174,8 +223,9 @@ class Human_intuition(dpll_algorithm):
             #check for more unit clauses
             litteral = self.has_unit_clause(knowledge_base)
         
-        #visualise current sudoku
-        vs.visualizer(solution=self.solution) if verbose else 0
+        if visualise:
+            #visualise current sudoku
+            vs.visualizer(solution=self.solution)
 
         #Check if there are no clauses left
         if knowledge_base == []:
@@ -217,17 +267,17 @@ def v_print(text):
 if __name__ == '__main__':
     # cnf = dpll.dpll_algorithm()
     # [knowledge_base] = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=1)
-    knowledge_base = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=5)
+    knowledge_base = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=2)
     # [knowledge_base] = sr.create_input('4x4.txt', cnf_form=True, num_of_games=1)
     
     verbose = True
+    visualise = True
 
     for kb in knowledge_base:        
         human = Human_intuition(dimensions=9)
-        if human.dpll(knowledge_base):
-            print("satisfiable")
+        if human.dpll(kb):
+            print("\n\nsatisfiable\n")
             # print(f'\tunits: {cnf.count_units}\n\tchoices: {cnf.count_lit_choose}\n\tlayer: {cnf.layer}')
             vs.visualizer(human.solution, dimensions=human.dimensions)
         else:
-            print("unsatisfiable")
-
+            print("\n\nunsatisfiable\n")
