@@ -1,6 +1,7 @@
 import random
 import sudoku_reader as sr
 import visualise_sudoku as vs
+from datetime import datetime, timedelta
 
 class dpll_algorithm:
     def __init__(self):
@@ -8,7 +9,9 @@ class dpll_algorithm:
         self.count_units = 0
         self.count_lit_choose = 0
         self.layer = 0
-        # self.unit_propagations_this_layer = 0
+        self.count_backpropagation = 0
+        self.clean_up_time = timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
+
 
     def add_start_to_solution(self, knowledge_base):
         litteral = self.has_unit_clause(knowledge_base)
@@ -42,9 +45,12 @@ class dpll_algorithm:
 
 
     def unit_propagation(self, knowledge_base, litteral):
+        start_time_clean_up = datetime.now()
         knowledge_base = [[l for l in clause if l != -1*litteral] for clause in knowledge_base if litteral not in clause]
         self.count_units += 1
         # self.unit_propagations_this_layer += 1
+        end_time_clean_up = datetime.now()
+        self.clean_up_time += (end_time_clean_up - start_time_clean_up)
         return knowledge_base
 
 
@@ -81,6 +87,7 @@ class dpll_algorithm:
             return True
         else:
             self.layer =+ 1
+            self.count_backpropagation += 1
             index = self.solution.index(litteral)
             self.solution = self.solution[:index]
             return self.dpll(knowledge_base + [[-1*litteral]])
@@ -88,6 +95,7 @@ class dpll_algorithm:
 
 if __name__ == '__main__':
     # knowledge_base = cnf.get_knowledge_base()
+    start_time = datetime.now()
     knowledge_base = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=4)
     # knowledge_base = sr.create_input('4x4.txt', cnf_form=True, num_of_games=5)
 
@@ -95,8 +103,22 @@ if __name__ == '__main__':
         cnf = dpll_algorithm()  
         
         if cnf.dpll(kb):
+            end_time = datetime.now()
+            runtime = end_time - start_time
+            computational_time = runtime - cnf.clean_up_time
             print("satisfiable")
+            print('Duration: {}'.format(runtime))
+            print('computational time: {}'.format(computational_time))
+            print(cnf.count_backpropagation)
             # print(f'\tunits: {cnf.count_units}\n\tchoices: {cnf.count_lit_choose}\n\tlayer: {cnf.layer}')
             vs.visualizer(cnf.solution)
+            
         else:
+            end_time = datetime.now()
+            runtime = end_time - start_time
+            computational_time = runtime - cnf.clean_up_time
             print("unsatisfiable")
+            print('Duration: {}'.format(runtime))
+            print('computational time: {}'.format(computational_time))
+            print(cnf.count_backpropagation)
+            

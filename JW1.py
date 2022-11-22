@@ -27,8 +27,8 @@ class jw_one_sided(dpll_algorithm):
             j = []
             for lenghts in dict_kb[litteral]:
                 calculate_j = 2 ** (-1*lenghts)
-                j.append(calculate_j)
-            dict_j_values[litteral] = sum(j)
+                j.append(calculate_j)      
+            dict_j_values[litteral] = sum(j)      
         return(dict_j_values)
 
 if __name__ == '__main__':
