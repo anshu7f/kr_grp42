@@ -35,18 +35,10 @@ class Human_intuition(dpll_algorithm):
     def choose_litteral(self, knowledge_base):
         self.count_lit_choose += 1
         row, col = self.find_max_info_position()
-        val = self.suggest_value_for_position(r=row, c=col)
+        literal = self.find_literal_from_position(r=row, c=col)
 
         #plus 1 for translation from index to row number
-        literal = int(f'{row+1}{col+1}{val}')
         print('suggest:', literal)
-
-
-        #!!!!!!!!!!!!!!!!!!delete!!!!!!!!!!!!!!!!!!!!!!
-        if literal in self.solution:
-            self.test += 1
-            print('ALARM FAULTY LITERAL INGESTED')
-        #!!!!!!!!!!!!!!!!!!!!delete!!!!!!!!!!!!!!!!!!!!
 
         return literal
 
@@ -118,24 +110,45 @@ class Human_intuition(dpll_algorithm):
 
         return
 
-    def elements_in_block(self, block)->set: 
-        #!!!!!!!!!!!!!!!!!!!!!to do!!!!!!!!!!!!!!!!!!!!!
+    def elements_in_block(self, block)->list: #list with all values from block
+
         if block:
             return [] 
 
-    def suggest_value_for_position(self, r, c):
+    def find_literal_from_position(self, r, c):
         #range of options:
-        options = [x for x in range(self.dimensions)]
+        options = [x for x in range(1, self.dimensions+1)]
         #find values in same row
         after_row_options = [x for x in options if x not in self.board_rep[r]]
         #find values in same column
         after_column_options = [x for x in after_row_options if x not in self.board_rep[:,c]]
         
         #find values in same block
-        block = self.find_block(r, c) # TO DO!!!!!!
+        block = self.find_block(r, c) 
         final_options = [x for x in after_column_options if x not in self.elements_in_block(block=block)]
-        
-        return random.choice(final_options)
+
+        #if no options are available, return False
+        if len(final_options)==0:
+            return False
+        # suggest a value and create literal
+        val = final_options[0] #random.choice(final_options)
+        literal = int(f'{r+1}{c+1}{val}')
+
+        #check if literal is not allready tried before backpropagation
+        while -1*literal in self.solution:
+            # if so, remove value from options
+            final_options = [x for x in final_options if x != val]
+
+            #if no options are available, return False
+            if len(final_options)==0:
+                return False
+
+            # pick new value and create new literal
+            val = random.choice(final_options)
+            literal = int(f'{r+1}{c+1}{val}')
+
+        # return 
+        return literal
 
 
     def find_max_info_position(self):
@@ -162,7 +175,7 @@ class Human_intuition(dpll_algorithm):
             litteral = self.has_unit_clause(knowledge_base)
         
         #visualise current sudoku
-        vs.visualizer(solution=self.solution)
+        vs.visualizer(solution=self.solution) if verbose else 0
 
         #Check if there are no clauses left
         if knowledge_base == []:
@@ -175,6 +188,10 @@ class Human_intuition(dpll_algorithm):
 
         #choose a litteral to propagate
         litteral = self.choose_litteral(knowledge_base)
+        
+        # if there is no possible litteral found for a position, return false
+        if not litteral:
+            return False
 
         if self.dpll(knowledge_base + [[litteral]]):
             #return true if solution is found
@@ -200,16 +217,17 @@ def v_print(text):
 if __name__ == '__main__':
     # cnf = dpll.dpll_algorithm()
     # [knowledge_base] = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=1)
-    [knowledge_base] = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=1)
+    knowledge_base = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=5)
     # [knowledge_base] = sr.create_input('4x4.txt', cnf_form=True, num_of_games=1)
-
-    human = Human_intuition(dimensions=9)
     
     verbose = True
 
-    if human.dpll(knowledge_base):
-        print("satisfiable")
-        vs.visualizer(human.solution, dimensions=human.dimensions)
-    else:
-        print("unsatisfiable")
+    for kb in knowledge_base:        
+        human = Human_intuition(dimensions=9)
+        if human.dpll(knowledge_base):
+            print("satisfiable")
+            # print(f'\tunits: {cnf.count_units}\n\tchoices: {cnf.count_lit_choose}\n\tlayer: {cnf.layer}')
+            vs.visualizer(human.solution, dimensions=human.dimensions)
+        else:
+            print("unsatisfiable")
 
