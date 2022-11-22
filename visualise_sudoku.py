@@ -3,21 +3,12 @@ import dpll
 import math
 
 
-def make_board(solution):
-    print(f'len(solutions): {len(solution)}')
-    #find dimensions
-    if len([x for x in solution if x > 0]) < 500:
-        dimensions = round(len(solution) ** (1/3))
-    elif len([x for x in solution if x > 0]) < 800:
-        dimensions = 9
-    else:
-        print('number of positive literals in solution:', len([x for x in solution if x > 0]))
-        dimensions = 9
+def make_board(solution, dimensions):
     #initiate an empty board (zeros)
     board = {}
     for r in range(dimensions):
         for c in range(dimensions):
-            board[f'{r}{c}'] = 0
+            board[f'{r}{c}'] = '.'
 
     if isinstance(solution,  list):
 
@@ -38,18 +29,18 @@ def make_board(solution):
             # board[r].append([c][v])
 
             #check if there already is a value
-            if board[r + c] > 0:
-                # print(f'Dubble value on {r}{c}')
+            if type(board[r + c]) is int:
+                print(f'Dubble value on {r}{c}')
                 pass
             else:
                 board[r + c] = v
     return board
 
 
-def print_board(board:dict):
+def print_board(board:dict, dimensions:int):
 
     #find dimensions
-    dim = round(len(board) ** 0.5)
+    dim = dimensions
 
     #create string for printing to visualise the board
     #initiate the string that will be printed
@@ -78,15 +69,15 @@ def print_board(board:dict):
     # print the board
     print(pr_str)
 
-def visualizer(solution):
-    board = make_board(solution=solution)
-    print_board(board=board)
+def visualizer(solution:list, dimensions:int=9):
+    board = make_board(solution=solution, dimensions=dimensions)
+    print_board(board=board, dimensions=dimensions)
 
 
 if __name__ == '__main__':
     cnf = dpll.dpll_algorithm()
-    [knowledge_base] = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=1)
-    # [knowledge_base] = sr.create_input('4x4.txt', cnf_form=True, num_of_games=1)
+    # [knowledge_base] = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=1)
+    [knowledge_base] = sr.create_input('4x4.txt', cnf_form=True, num_of_games=1)
 
 
     if cnf.dpll(knowledge_base):
