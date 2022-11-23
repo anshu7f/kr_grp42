@@ -2,6 +2,8 @@ import random
 import sudoku_reader as sr
 import visualise_sudoku as vs
 from datetime import datetime, timedelta
+import pandas as pd
+import numpy as np
 
 class dpll_algorithm:
     def __init__(self):
@@ -47,9 +49,9 @@ class dpll_algorithm:
     def unit_propagation(self, knowledge_base, litteral):
         start_time_clean_up = datetime.now()
         knowledge_base = [[l for l in clause if l != -1*litteral] for clause in knowledge_base if litteral not in clause]
+        end_time_clean_up = datetime.now()
         self.count_units += 1
         # self.unit_propagations_this_layer += 1
-        end_time_clean_up = datetime.now()
         self.clean_up_time += (end_time_clean_up - start_time_clean_up)
         return knowledge_base
 
@@ -96,29 +98,34 @@ class dpll_algorithm:
 if __name__ == '__main__':
     # knowledge_base = cnf.get_knowledge_base()
     start_time = datetime.now()
-    knowledge_base = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=4)
-    # knowledge_base = sr.create_input('4x4.txt', cnf_form=True, num_of_games=5)
+    #knowledge_base = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=4)
+    knowledge_base = sr.create_input('4x4.txt', cnf_form=True, num_of_games=2)
+    total_data = []
+    
 
     for kb in knowledge_base:
         cnf = dpll_algorithm()  
-        
+        data = []
         if cnf.dpll(kb):
             end_time = datetime.now()
             runtime = end_time - start_time
+            data.append(runtime)
             computational_time = runtime - cnf.clean_up_time
+            data.append(computational_time)
+            data.append(cnf.count_backpropagation)
+
             print("satisfiable")
-            print('Duration: {}'.format(runtime))
-            print('computational time: {}'.format(computational_time))
-            print(cnf.count_backpropagation)
+            # print('Duration: {}'.format(runtime))
+            # print('computational time: {}'.format(computational_time))
+            # print(cnf.count_backpropagation)
             # print(f'\tunits: {cnf.count_units}\n\tchoices: {cnf.count_lit_choose}\n\tlayer: {cnf.layer}')
-            vs.visualizer(cnf.solution)
+            # vs.visualizer(cnf.solution)
+    
             
         else:
-            end_time = datetime.now()
-            runtime = end_time - start_time
-            computational_time = runtime - cnf.clean_up_time
             print("unsatisfiable")
-            print('Duration: {}'.format(runtime))
-            print('computational time: {}'.format(computational_time))
-            print(cnf.count_backpropagation)
-            
+
+        total_data.append(data)
+    print(total_data)
+    results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
+    results.to_csv('results_basic_dpll.csv', index=False)

@@ -8,6 +8,9 @@ from dpll import dpll_algorithm
 import sudoku_reader as sr
 import visualise_sudoku as vs
 
+import pandas as pd
+from datetime import datetime, timedelta
+
 
 class Human_intuition(dpll_algorithm):
     def __init__(self, dimensions:int=9) -> None:
@@ -43,10 +46,13 @@ class Human_intuition(dpll_algorithm):
 
 
     def unit_propagation(self, knowledge_base, litteral):
+        start_time_clean_up = datetime.now()
         knowledge_base = [[l for l in clause if l != -1*litteral] for clause in knowledge_base if litteral not in clause]
+        end_time_clean_up = datetime.now()
         self.count_units += 1
         #update (information) for choosing litteral
         self.update_boards(litteral)
+        self.clean_up_time += (end_time_clean_up - start_time_clean_up)
         return knowledge_base
 
 
@@ -272,12 +278,26 @@ if __name__ == '__main__':
     
     verbose = True
     visualise = True
+    start_time = datetime.now()
 
-    for kb in knowledge_base:        
+    total_data = []
+    
+    for kb in knowledge_base:  
+        data = []    
         human = Human_intuition(dimensions=9)
         if human.dpll(kb):
+            end_time = datetime.now()
+            runtime = end_time - start_time
+            data.append(runtime)
+            computational_time = runtime - human.clean_up_time
+            data.append(computational_time)
+            data.append(human.count_backpropagation)
             print("\n\nsatisfiable\n")
             # print(f'\tunits: {cnf.count_units}\n\tchoices: {cnf.count_lit_choose}\n\tlayer: {cnf.layer}')
             vs.visualizer(human.solution, dimensions=human.dimensions)
         else:
             print("\n\nunsatisfiable\n")
+        total_data.append(data)
+    print(total_data)
+    results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
+    results.to_csv('results_human_in.csv', index=False)
