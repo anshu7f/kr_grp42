@@ -43,7 +43,8 @@ class Human_intuition(dpll_algorithm):
                 '10': (2,4,0,2),
                 '11': (2,4,2,4)
                 }
-
+        self.clean_up_time = timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
+        self.count_backpropagation = 0
 
     def unit_propagation(self, knowledge_base, litteral):
         start_time_clean_up = datetime.now()
@@ -253,7 +254,8 @@ class Human_intuition(dpll_algorithm):
             #return true if solution is found
             return True
         else:
-            v_print('BACKPROPAGATE: ' + str(litteral))
+            self.count_backpropagation += 1
+            # v_print('BACKPROPAGATE: ' + str(litteral))
             #delete literal from solution that are added after invalid literal
             index = self.solution.index(litteral)
             self.solution = self.solution[:index]
@@ -273,11 +275,11 @@ def v_print(text):
 if __name__ == '__main__':
     # cnf = dpll.dpll_algorithm()
     # [knowledge_base] = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=1)
-    knowledge_base = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=2)
+    # knowledge_base = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=91)
     # [knowledge_base] = sr.create_input('4x4.txt', cnf_form=True, num_of_games=1)
-    
-    verbose = True
-    visualise = True
+    knowledge_base = sr.create_input('4x4.txt', cnf_form=True, num_of_games=1000)
+    verbose = False
+    visualise = False
     start_time = datetime.now()
 
     total_data = []
@@ -294,10 +296,10 @@ if __name__ == '__main__':
             data.append(human.count_backpropagation)
             print("\n\nsatisfiable\n")
             # print(f'\tunits: {cnf.count_units}\n\tchoices: {cnf.count_lit_choose}\n\tlayer: {cnf.layer}')
-            vs.visualizer(human.solution, dimensions=human.dimensions)
+            # vs.visualizer(human.solution, dimensions=human.dimensions)
         else:
             print("\n\nunsatisfiable\n")
         total_data.append(data)
-    print(total_data)
+    # print(total_data)
     results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
-    results.to_csv('results_human_in.csv', index=False)
+    results.to_csv('results_human_in4x4.csv', index=False)

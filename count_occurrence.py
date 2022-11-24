@@ -10,7 +10,8 @@ import numpy as np
 class new_dpll(dpll_algorithm):
     def choose_litteral(self, knowledge_base):
         dict_kb = self.make_dictionary(knowledge_base)
-        max_value = max(dict_kb, key=dict_kb.get)
+        max_value = min(dict_kb, key=dict_kb.get)
+        # print(max_value)
         return(max_value)
 
     def make_dictionary(self, knowledge_base):
@@ -22,15 +23,15 @@ class new_dpll(dpll_algorithm):
                     dict_kb[litteral] = 1
                 else:
                     dict_kb[litteral] += 1
-
+        # print(dict_kb)
         return(dict_kb)
 
 if __name__ == '__main__':
 
     # knowledge_base = cnf.get_knowledge_base()
     start_time = datetime.now()
-    #knowledge_base = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=4)
-    knowledge_base = sr.create_input('4x4.txt', cnf_form=True, num_of_games=2)
+    knowledge_base = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=91)
+    # knowledge_base = sr.create_input('4x4.txt', cnf_form=True, num_of_games=1000)
     total_data = []
     
 
@@ -57,8 +58,8 @@ if __name__ == '__main__':
             print("unsatisfiable")
 
         total_data.append(data)
-    print(total_data)
+   
     results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
-    results.to_csv('results_dpll_literal_occurrence.csv', index=False)
+    results.to_csv('results_dpll_literal_occurrence_9x9_min.csv', index=False)
 
 

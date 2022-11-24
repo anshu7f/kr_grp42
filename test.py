@@ -1,3 +1,5 @@
+from dpll import dpll_algorithm
+import sudoku_reader as sr
 import random
 import sudoku_reader as sr
 import visualise_sudoku as vs
@@ -5,11 +7,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 
-import human_intuition
-import JW1
-import JW2
-
-class dpll_algorithm:
+class new_dpll():
     def __init__(self):
         self.solution = []
         self.count_units = 0
@@ -17,8 +15,8 @@ class dpll_algorithm:
         self.layer = 0
         self.count_backpropagation = 0
         self.clean_up_time = timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
+        self.dict = {}
 
-        
     def get_knowledge_base(self):
         with open('sudoku1.cnf', 'r') as dimacs_file:
             lines = dimacs_file.readlines()
@@ -39,29 +37,47 @@ class dpll_algorithm:
                 self.solution.append(clause[0])
                 return clause[0]
         return False
+    def choose_litteral(self, knowledge_base):
+        # dict_kb = self.make_dictionary(knowledge_base)
+        max_value = max(self.dict, key=self.dict.get)
+        return(max_value)
 
+    def make_dictionary(self, knowledge_base):
+        dict_kb = {}
 
+        for clause in knowledge_base:
+            for litteral in clause:
+                if litteral not in dict_kb:
+                    dict_kb[litteral] = 1
+                else:
+                    dict_kb[litteral] += 1
+
+        return(dict_kb)
+
+    
     def unit_propagation(self, knowledge_base, litteral):
         start_time_clean_up = datetime.now()
+        if -1*litteral in self.dict:
+            del self.dict[-1*litteral]
+
+    
         knowledge_base = [[l for l in clause if l != -1*litteral] for clause in knowledge_base if litteral not in clause]
+        for clause in knowledge_base:
+            if litteral in clause:
+                for l in clause:
+                    if l in self.dict:
+                        self.dict[l] -= 1
+
         end_time_clean_up = datetime.now()
         self.count_units += 1
         # self.unit_propagations_this_layer += 1
         self.clean_up_time += (end_time_clean_up - start_time_clean_up)
         return knowledge_base
 
-
-    def choose_litteral(self, knowledge_base):
-        # random_clause = random.choice(knowledge_base)
-        # random_literal = random.choice(random_clause)
-        self.count_lit_choose += 1
-        return knowledge_base[0][0]
-
-
     def dpll(self, knowledge_base):
         self.layer =+ 1
         # unit_propagations_this_layer = 0
-
+        self.dict = self.make_dictionary(knowledge_base)
         litteral = self.has_unit_clause(knowledge_base)
         
         while litteral:
@@ -91,6 +107,7 @@ class dpll_algorithm:
         
 
 if __name__ == '__main__':
+
     # knowledge_base = cnf.get_knowledge_base()
     start_time = datetime.now()
     knowledge_base = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=91)
@@ -98,8 +115,8 @@ if __name__ == '__main__':
     total_data = []
     
 
-    for index, kb in enumerate(knowledge_base):
-        cnf = dpll_algorithm()  
+    for kb in knowledge_base:
+        cnf = new_dpll()  
         data = []
         if cnf.dpll(kb):
             end_time = datetime.now()
@@ -109,30 +126,19 @@ if __name__ == '__main__':
             data.append(computational_time)
             data.append(cnf.count_backpropagation)
 
-            # print("satisfiable")    
+            print("satisfiable")
+            # print('Duration: {}'.format(runtime))
+            # print('computational time: {}'.format(computational_time))
+            # print(cnf.count_backpropagation)
+            # print(f'\tunits: {cnf.count_units}\n\tchoices: {cnf.count_lit_choose}\n\tlayer: {cnf.layer}')
+            # vs.visualizer(cnf.solution)
+    
             
         else:
-            end_time = datetime.now()
-            runtime = end_time - start_time
-            data.append(runtime)
-            computational_time = runtime - cnf.clean_up_time
-            data.append(computational_time)
-            data.append(cnf.count_backpropagation)
-
-            # print("unsatisfiable")
+            print("unsatisfiable")
 
         total_data.append(data)
-
-        if index % 5 == 0:
-            #save results every 5 sudokus
-            results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
-            results.to_csv('results_basic_dpll.csv', index=False)
-
-
+   
     results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
-    results.to_csv('results_basic_dpll.csv', index=False)
+    results.to_csv('results_dpll_literal_occurrence_9x9.csv', index=False)
 
-
-    print('baseline:',total_data)
-    results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
-    results.to_csv('results_basic_dpll_9x9.csv', index=False)
