@@ -41,7 +41,7 @@ if __name__ == '__main__':
     total_data = []
     
 
-    for kb in knowledge_base:
+    for index, kb in enumerate(knowledge_base):
         cnf = jw_one_sided() 
         data = []
         if cnf.dpll(kb):
@@ -52,18 +52,26 @@ if __name__ == '__main__':
             data.append(computational_time)
             data.append(cnf.count_backpropagation)
 
-            print("satisfiable")
-            # print('Duration: {}'.format(runtime))
-            # print('computational time: {}'.format(computational_time))
-            # print(cnf.count_backpropagation)
-            # print(f'\tunits: {cnf.count_units}\n\tchoices: {cnf.count_lit_choose}\n\tlayer: {cnf.layer}')
-            # vs.visualizer(cnf.solution)
-    
+            print("satisfiable")    
             
         else:
+            end_time = datetime.now()
+            runtime = end_time - start_time
+            data.append(runtime)
+            computational_time = runtime - cnf.clean_up_time
+            data.append(computational_time)
+            data.append(cnf.count_backpropagation)
+
             print("unsatisfiable")
 
         total_data.append(data)
+
+        if index % 5 == 0:
+            #save results every 5 sudokus
+            results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
+            results.to_csv('results_JW1.csv', index=False)
+
+
     print(total_data)
     results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
     results.to_csv('results_JW1.csv', index=False)

@@ -5,6 +5,10 @@ from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 
+import human_intuition
+import JW1
+import JW2
+
 class dpll_algorithm:
     def __init__(self):
         self.solution = []
@@ -103,7 +107,7 @@ if __name__ == '__main__':
     total_data = []
     
 
-    for kb in knowledge_base:
+    for index, kb in enumerate(knowledge_base):
         cnf = dpll_algorithm()  
         data = []
         if cnf.dpll(kb):
@@ -114,18 +118,30 @@ if __name__ == '__main__':
             data.append(computational_time)
             data.append(cnf.count_backpropagation)
 
-            print("satisfiable")
-            # print('Duration: {}'.format(runtime))
-            # print('computational time: {}'.format(computational_time))
-            # print(cnf.count_backpropagation)
-            # print(f'\tunits: {cnf.count_units}\n\tchoices: {cnf.count_lit_choose}\n\tlayer: {cnf.layer}')
-            # vs.visualizer(cnf.solution)
-    
+            # print("satisfiable")    
             
         else:
-            print("unsatisfiable")
+            end_time = datetime.now()
+            runtime = end_time - start_time
+            data.append(runtime)
+            computational_time = runtime - cnf.clean_up_time
+            data.append(computational_time)
+            data.append(cnf.count_backpropagation)
+
+            # print("unsatisfiable")
 
         total_data.append(data)
-    print(total_data)
+
+        if index % 5 == 0:
+            #save results every 5 sudokus
+            results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
+            results.to_csv('results_basic_dpll.csv', index=False)
+
+
+    results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
+    results.to_csv('results_basic_dpll.csv', index=False)
+
+
+    print('baseline:',total_data)
     results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
     results.to_csv('results_basic_dpll.csv', index=False)
