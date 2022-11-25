@@ -230,10 +230,6 @@ class Human_intuition(dpll_algorithm):
             #check for more unit clauses
             litteral = self.has_unit_clause(knowledge_base)
         
-        if visualise:
-            #visualise current sudoku
-            vs.visualizer(solution=self.solution)
-
         #Check if there are no clauses left
         if knowledge_base == []:
             return True
