@@ -116,7 +116,7 @@ def transform_to_cnf(dimac):
     return knowledge_base
 
 
-def create_input(filename:str, cnf_form:bool=False, num_of_games:int=1):
+def create_input(filename:str, cnf_form:bool=False, num_of_games:int=1, start_at_index:int=0):
 
     #debug/print variables
     length_of_print_per_game = 200
@@ -129,9 +129,9 @@ def create_input(filename:str, cnf_form:bool=False, num_of_games:int=1):
     
     #return the represention
     if cnf_form:
-        return [transform_to_cnf(puzzle_and_rules_to_dimac(game)) for game in input[:num_of_games]]
+        return [transform_to_cnf(puzzle_and_rules_to_dimac(game)) for game in input[start_at_index:num_of_games]]
     else:
-        return [puzzle_and_rules_to_dimac(game) for game in input[:num_of_games]]
+        return [puzzle_and_rules_to_dimac(game) for game in input[start_at_index:num_of_games]]
 
 if __name__ == '__main__':
 

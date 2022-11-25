@@ -1,35 +1,37 @@
 from dpll import dpll_algorithm
 import sudoku_reader as sr
+import hulpfunctions as hf
 import pandas as pd
 from datetime import datetime, timedelta
-import hulpfunctions as hf
-
 
 class jw_one_sided(dpll_algorithm):
     def choose_litteral(self, knowledge_base):
         self.t.start()
 
-
         dict_j_values = self.calculate_j(knowledge_base)
         max_value = max(dict_j_values, key=dict_j_values.get)
-        # print(max_value)
 
         self.time_choose += self.t.stop()
-        return(max_value)
+        return max_value
 
-    def make_dictionary(self, knowledge_base):
+    def calculate_j(self, knowledge_base):
         dict_kb = {}
 
         for clause in knowledge_base:
             for litteral in clause:
-                if litteral not in dict_kb:
-                    dict_kb[litteral] = [len(clause)]
-                else:
-                    dict_kb[litteral].append(len(clause))
 
-        return(dict_kb)
+                calculate_j = 2**(-1*len(clause))
+                
+                try:
+                    dict_kb[litteral] += calculate_j
+                except:
+                    dict_kb[litteral] = calculate_j
 
-    def calculate_j(self, knowledge_base):
+        # x = {dict_kb[literal]: 2**(-1*len(clause)) for clause in knowledge_base for literal in clause}
+
+        return dict_kb
+
+    def calculate_j_2(self, knowledge_base):
         dict_j_values = {}
         dict_kb = self.make_dictionary(knowledge_base)
 
@@ -44,8 +46,8 @@ class jw_one_sided(dpll_algorithm):
 if __name__ == '__main__':
      # knowledge_base = cnf.get_knowledge_base()
     start_time = datetime.now()
-    knowledge_base = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=4)
-    # knowledge_base = sr.create_input('4x4.txt', cnf_form=True, num_of_games=1000)
+    knowledge_base = sr.create_input('top91.sdk.txt', cnf_form=True, num_of_games=1)
+    # knowledge_base = sr.create_input('4x4.txt', cnf_form=True, num_of_games=2)
     total_data = []
     
 
@@ -79,13 +81,12 @@ if __name__ == '__main__':
         print(f'total time sudoku {index}: {T_total.stop()}')
         print(f'Time choosing litteral: {cnf.time_choose}')
 
-
-        if index % 5 == 0:
+        if index % 1 == 0:
             #save results every 5 sudokus
             results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
-            results.to_csv('TEST_results_JW1.csv', index=False)
+            results.to_csv('TEST2_results_JW1.csv', index=False)
 
 
     print(total_data)
     results = pd.DataFrame(total_data, columns=('Runtime', 'Computationaltime', 'Backtracks'))
-    results.to_csv('TEST_results_JW1.csv', index=False)
+    results.to_csv('TEST2_results_JW1.csv', index=False)

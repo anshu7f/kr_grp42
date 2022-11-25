@@ -1,13 +1,11 @@
 import random
 import sudoku_reader as sr
 import visualise_sudoku as vs
+import hulpfunctions as hf
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 
-import human_intuition
-import JW1
-import JW2
 
 class dpll_algorithm:
     def __init__(self):
@@ -17,6 +15,9 @@ class dpll_algorithm:
         self.layer = 0
         self.count_backpropagation = 0
         self.clean_up_time = timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
+
+        self.t = hf.Timer()
+        self.time_choose = 0.0
 
         
     def get_knowledge_base(self):
@@ -100,6 +101,9 @@ if __name__ == '__main__':
 
     for index, kb in enumerate(knowledge_base):
         cnf = dpll_algorithm()  
+        T_total = hf.Timer()
+        T_total.start()
+
         data = []
         if cnf.dpll(kb):
             end_time = datetime.now()
@@ -122,6 +126,7 @@ if __name__ == '__main__':
             # print("unsatisfiable")
 
         total_data.append(data)
+        print(f'total time sudoku {index}: {T_total.stop()}')
 
         if index % 5 == 0:
             #save results every 5 sudokus
